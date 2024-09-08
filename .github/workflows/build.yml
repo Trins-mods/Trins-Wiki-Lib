@@ -28,6 +28,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
+      - name: Setup Gradle Dependencies Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+              ~/.gradle/caches
+              ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle.properties') }}
       - name: build
         run: ./gradlew build
       - name: capture build artifacts
