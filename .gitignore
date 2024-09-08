@@ -43,3 +43,5 @@ classes
 
 libs
 *.csv
+!gradle/
+!gradle/**
