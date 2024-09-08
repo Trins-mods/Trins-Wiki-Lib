@@ -16,7 +16,10 @@ base {
 }
 
 version = "${mod_version}"
-group = "trinsdar.trins_wiki_lib" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = project.maven_group
+
+def isCI = System.getenv("GITHUB_ACTION")
+def isRELEASE = System.getenv("GITHUB_RELEASE")
 
 minecraft {
     mappings channel: "parchment", version: "${rootProject.mappings_version}-${rootProject.minecraft_version}"
@@ -153,4 +156,25 @@ tasks.named('jar', Jar).configure {
 
     // This is the preferred method to reobfuscate your jar file
     finalizedBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        mavenJava(org.gradle.api.publish.maven.MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        if (isCI && isRELEASE) {
+            maven {
+                url = "https://repo.repsy.io/mvn/trinsdar/trins-mods/"
+                credentials {
+                    username = System.getenv("MAVEN_USERNAME")
+                    password = System.getenv("MAVEN_PASSWORD")
+                }
+            }
+        } else {
+            mavenLocal()
+        }
+    }
 }
