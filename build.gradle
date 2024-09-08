@@ -1,0 +1,156 @@
+import org.gradle.api.tasks.bundling.Jar
+
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'maven-publish'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+}
+apply plugin: "java"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+
+
+base {
+    archivesName = "trins-wiki-lib"
+}
+
+version = "${mod_version}"
+group = "trinsdar.trins_wiki_lib" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+
+minecraft {
+    mappings channel: "parchment", version: "${rootProject.mappings_version}-${rootProject.minecraft_version}"
+
+    copyIdeResources = true
+
+    runs {
+        // applies to all the run configs below
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', mod_id
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        data {
+            // example of overriding the workingDirectory set in configureEach above
+            workingDirectory project.file('run-data')
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+repositories{
+    maven { url "https://dist.creeper.host/Sponge/maven" }
+    maven { // Tech Reborn
+        name 'Tech Reborn'
+        url 'https://maven.modmuss50.me/'
+    }
+    maven { // Buildcraft
+        name 'buildcraft'
+        url 'https://mod-buildcraft.com/maven/'
+    }
+    maven { // CCL, CCC, NEI
+        name 'Chickenbones Repo'
+        url 'https://chickenbones.net/maven/'
+    }
+    maven {
+        name = 'parchment'
+        url = 'https://maven.parchmentmc.org'
+    }
+    maven { // The One Probe, EnderIO, EnderCore
+        name 'tterrag'
+        url 'https://maven.tterrag.com/'
+    }
+    maven { // CoFH
+        name 'Covers Maven'
+        url 'https://maven.covers1624.net/'
+    }
+    maven { // McJtyLib
+        url "https://modmaven.k-4u.nl"
+    }
+    maven {
+        url = "https://www.cursemaven.com"
+    }
+    maven { // JEI
+        name 'DVS1 Maven FS'
+        url 'https://dvs1.progwml6.com/files/maven/'
+    }
+    maven { url "https://maven.shedaniel.me" }
+    maven {
+        url "https://cursemaven.com"
+    }
+    maven {
+        url = "https://api.modrinth.com/maven"
+    }
+    maven {
+        url 'https://repo.repsy.io/mvn/trinsdar/trins-mods/'
+    }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    // Apply Mixin AP
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation(fg.deobf("curse.maven:ic2_classic-242942:5612597"))
+    implementation(fg.deobf("curse.maven:curios-309927:3871347"))
+    implementation fg.deobf("curse.maven:jei-238222:4712866")
+    implementation(fg.deobf("maven.modrinth:carbon-config:l6LTuPIs"))
+    implementation fg.deobf("curse.maven:sophisticated-core-618298:5296313")
+    implementation fg.deobf("curse.maven:advanced-solars-classic-314835:5693305")
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.mod_version
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.mod_version
+    }
+}
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : "Trinsdar",
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : "Trinsdar",
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    // This is the preferred method to reobfuscate your jar file
+    finalizedBy 'reobfJar'
+}
