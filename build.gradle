@@ -162,6 +162,7 @@ publishing {
     publications {
         mavenJava(org.gradle.api.publish.maven.MavenPublication) {
             from components.java
+            artifactId = "trins-wiki-lib"
         }
     }
     repositories {
