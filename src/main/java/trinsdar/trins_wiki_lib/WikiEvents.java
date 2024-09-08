@@ -21,6 +21,9 @@ public class WikiEvents {
             if (ModList.get().isLoaded("gravisuit")) {
                 pageList.add(new CategoryObj("wiki.gravisuit.category.main", new CategoryObj.Link(getItem("gravisuit", "gravitool"), "gravisuit:tools").with("wiki.gravisuit.header.tools"), new CategoryObj.Link(getItem("gravisuit", "advanced_electric_jetpack"), "gravisuit:armor").with("wiki.gravisuit.header.armor")));
             }
+            if (ModList.get().isLoaded("advanced_solars")) {
+                pageList.add(new CategoryObj("wiki.advanced_solars.category", new CategoryObj.Link(getItem("advanced_solars", "advanced_solar_panel"), "advanced_solars:items").with("wiki.advanced_solars.header.main")));
+            }
             setupEvent.registerChapters(pageList.toArray(IWikiObj[]::new));
         }
     }
