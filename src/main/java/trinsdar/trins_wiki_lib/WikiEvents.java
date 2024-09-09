@@ -18,12 +18,21 @@ public class WikiEvents {
         if (event instanceof WikiEvent.AddonSetupEvent setupEvent) setupEvent.enableAddons();
         if (event instanceof WikiEvent.AddonPageEvent setupEvent){
             List<IWikiObj> pageList = new ArrayList<>();
+            List<CategoryObj.Link> links = new ArrayList<>();
+            String key = null;
             if (ModList.get().isLoaded("gravisuit")) {
-                pageList.add(new CategoryObj("wiki.gravisuit.category.main", new CategoryObj.Link(getItem("gravisuit", "gravitool"), "gravisuit:tools").with("wiki.gravisuit.header.tools"), new CategoryObj.Link(getItem("gravisuit", "advanced_electric_jetpack"), "gravisuit:armor").with("wiki.gravisuit.header.armor")));
+                key = "wiki.gravisuit.category";
+                links.add(new CategoryObj.Link(getItem("gravisuit", "gravitool"), "gravisuit:tools").with("wiki.gravisuit.header.tools"));
+                links.add(new CategoryObj.Link(getItem("gravisuit", "advanced_electric_jetpack"), "gravisuit:armor").with("wiki.gravisuit.header.armor"));
             }
             if (ModList.get().isLoaded("advanced_solars")) {
-                pageList.add(new CategoryObj("wiki.advanced_solars.category", new CategoryObj.Link(getItem("advanced_solars", "advanced_solar_panel"), "advanced_solars:items").with("wiki.advanced_solars.header.main")));
+                if (key != null)
+                    key = "wiki.trins_wiki_lib.category";
+                else
+                    key = "wiki.advanced_solars.category";
+                links.add(new CategoryObj.Link(getItem("advanced_solars", "advanced_solar_panel"), "advanced_solars:items").with("wiki.advanced_solars.header.main"));
             }
+            pageList.add(new CategoryObj(key, links.toArray(CategoryObj.Link[]::new)));
             setupEvent.registerChapters(pageList.toArray(IWikiObj[]::new));
         }
     }
